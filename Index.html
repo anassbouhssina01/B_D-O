@@ -1,1 +1,3649 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق تدبير مكتب الضبط</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        /* CSS Styles - (تم الاحتفاظ بجميع الأنماط الأصلية كما هي) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background-color: #1a5276;
+            color: white;
+            padding: 20px 0;
+            transition: all 0.3s;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 22px;
+            text-align: center;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-menu a.active {
+            background-color: #3498db;
+            border-right: 3px solid white;
+        }
+
+        .sidebar-menu i {
+            margin-left: 10px;
+            font-size: 18px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-right: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+            position: relative; /* تمت الإضافة لدعم زر القائمة */
+        }
+
+        /* زر تبديل القائمة للموبايل */
+        .menu-toggle {
+            display: none; /* مخفي افتراضيًا */
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            background-color: #1a5276;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #1a5276;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            background-color: #f9fafb;
+        }
+
+        .form-section h2 {
+            color: #1a5276;
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-section h2 i {
+            margin-left: 10px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            gap: 20px;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-group input {
+            margin-left: 10px;
+            transform: scale(1.2);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background-color: #138496;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .btn i {
+            margin-left: 8px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .autocomplete-container {
+            position: relative;
+        }
+
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #d4d4d4;
+            border-bottom: none;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .autocomplete-item {
+            padding: 10px;
+            cursor: pointer;
+            background-color: #fff;
+            border-bottom: 1px solid #d4d4d4;
+        }
+
+        .autocomplete-item:hover {
+            background-color: #e9e9e9;
+        }
+
+        .autocomplete-active {
+            background-color: #3498db !important;
+            color: white;
+        }
+
+        .notification {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+        }
+
+        .notification-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .notification-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .notification i {
+            margin-left: 10px;
+            font-size: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+            color: #3498db;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .required::after {
+            content: " *";
+            color: #e74c3c;
+        }
+
+        .employee-entry {
+            background-color: #fff;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .employee-entry h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+
+        .employee-entry h3 i {
+            margin-left: 8px;
+        }
+
+        .remove-employee {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .attachment-item input {
+            flex: 1;
+            margin-left: 10px;
+        }
+
+        .attachment-item button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        /* Search Section Styles */
+        .search-container {
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .search-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .employee-card {
+            background-color: #f9fafb;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 15px;
+            transition: transform 0.3s;
+        }
+
+        .employee-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .employee-card h3 {
+            color: #1a5276;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .employee-card p {
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .employee-card .employee-number {
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        /* Knowledge Map Section Styles */
+        .knowledge-map-container {
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .knowledge-map-form {
+            margin-bottom: 30px;
+        }
+
+        .file-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .file-upload input[type=file] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .file-upload-label:hover {
+            background-color: #2980b9;
+        }
+
+        .excel-info {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f1f8ff;
+            border: 1px solid #b3d7ff;
+        }
+
+        .excel-info h3 {
+            color: #1a5276;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .excel-info ul {
+            margin-right: 20px;
+        }
+
+        .excel-info li {
+            margin-bottom: 5px;
+        }
+
+        /* Task Management Section Styles */
+        .task-management-container {
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-list {
+            margin-top: 20px;
+        }
+
+        .task-item {
+            background-color: #f9fafb;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .task-item h3 {
+            color: #1a5276;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .task-item p {
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .task-item .task-status {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .status-in-progress {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .status-completed {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        /* Home Section Styles */
+        .home-container {
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e1e8ed;
+        }
+
+        .filter-section h2 {
+            color: #1a5276;
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .filter-section h2 i {
+            margin-left: 10px;
+        }
+
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .filter-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background-color: #f9fafb;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card i {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card h3 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            color: #7f8c8d;
+        }
+
+        .stat-card.incoming {
+            border-top: 4px solid #3498db;
+        }
+
+        .stat-card.incoming i {
+            color: #3498db;
+        }
+
+        .stat-card.outgoing {
+            border-top: 4px solid #2ecc71;
+        }
+
+        .stat-card.outgoing i {
+            color: #2ecc71;
+        }
+
+        .stat-card.rejected {
+            border-top: 4px solid #e74c3c;
+        }
+
+        .stat-card.rejected i {
+            color: #e74c3c;
+        }
+
+        .stat-card.distributed {
+            border-top: 4px solid #f39c12;
+        }
+
+        .stat-card.distributed i {
+            color: #f39c12;
+        }
+
+        /* Mail Status Styles */
+        .mail-status {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .mail-status .form-group {
+            flex: 1;
+        }
+
+        .rejection-reason {
+            margin-top: 10px;
+        }
+
+        /* Linked Mail Styles */
+        .linked-mail-container {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+
+        .linked-mail-item {
+            background-color: #fff;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .linked-mail-item h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+
+        .linked-mail-item h3 i {
+            margin-left: 8px;
+        }
+
+        .linked-mail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .linked-mail-number {
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .linked-mail-date {
+            color: #7f8c8d;
+        }
+
+        .linked-mail-subject {
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .linked-mail-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .linked-mail-detail {
+            background-color: #f1f1f1;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        .linked-mail-detail-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .linked-mail-attachments {
+            margin-top: 10px;
+        }
+
+        .linked-mail-attachment {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            text-decoration: none;
+        }
+
+        .linked-mail-attachment:hover {
+            background-color: #2980b9;
+        }
+
+        .mail-link-actions {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .mail-link-actions button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .mail-link-actions button:hover {
+            background-color: #c0392b;
+        }
+
+        /* Data Update Status */
+        .data-update-status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f9fafb;
+            border: 1px solid #e1e8ed;
+            text-align: center;
+        }
+
+        .data-update-status.active {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        /* File Selection Modal */
+        .file-selection-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .file-selection-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .file-selection-content h2 {
+            margin-bottom: 20px;
+            color: #1a5276;
+        }
+
+        .file-selection-content p {
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .file-selection-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar-header h2 {
+                display: none;
+            }
+            
+            .sidebar-menu a span {
+                display: none;
+            }
+            
+            .main-content {
+                margin-right: 70px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .form-group {
+                min-width: 100%;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-results {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-row {
+                flex-direction: column;
+            }
+            
+            .mail-status {
+                flex-direction: column;
+            }
+            
+            .linked-mail-details {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                transform: translateX(100%); /* تم التعديل ليتناسب مع RTL */
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-right: 0;
+            }
+            
+            .menu-toggle {
+                display: block; /* إظهار الزر */
+            }
+        }
+
+        /* New styles for the updated functionality */
+        .mail-reply-form {
+            background-color: #f9fafb;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .mail-reply-form h3 {
+            color: #1a5276;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+
+        .mail-reply-form h3 i {
+            margin-left: 10px;
+        }
+
+        .mail-details {
+            background-color: #fff;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .mail-details h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .mail-details p {
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .concerned-persons {
+            margin-top: 15px;
+        }
+
+        .concerned-persons h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .concerned-person-item {
+            background-color: #f1f1f1;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .concerned-person-item input[type="checkbox"] {
+            margin-left: 10px;
+            transform: scale(1.2);
+        }
+
+        .concerned-person-item label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .search-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-filters .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .reply-form-container {
+            background-color: #f9fafb;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .reply-form-container h3 {
+            color: #1a5276;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+
+        .reply-form-container h3 i {
+            margin-left: 10px;
+        }
+
+        .registration-info {
+            background-color: #fff;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .registration-info h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .registration-info p {
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .persons-list {
+            margin-top: 15px;
+        }
+
+        .persons-list h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .person-item {
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .person-item input[type="checkbox"] {
+            margin-left: 10px;
+            transform: scale(1.2);
+        }
+
+        .person-item label {
+            flex: 1;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .person-item .person-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .person-item .person-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .person-item .person-number {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        /* Data Optimization Info */
+        .data-optimization-info {
+            background-color: #f1f8ff;
+            border: 1px solid #b3d7ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .data-optimization-info h3 {
+            color: #1a5276;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .data-optimization-info ul {
+            margin-right: 20px;
+        }
+
+        .data-optimization-info li {
+            margin-bottom: 5px;
+        }
+
+        .storage-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+
+        .storage-stat {
+            text-align: center;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            min-width: 120px;
+        }
+
+        .storage-stat h4 {
+            color: #3498db;
+            margin-bottom: 5px;
+        }
+
+        .storage-stat p {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div id="file-selection-modal" class="file-selection-modal">
+        <div class="file-selection-content">
+            <h2><i class="fas fa-folder-open"></i> اختيار ملف البيانات</h2>
+            <p>يرجى اختيار ملف JSON لتخزين بيانات المراسلات. سيتم استخدام هذا الملف لحفظ جميع البيانات.</p>
+            <div class="data-optimization-info">
+                <h3><i class="fas fa-info-circle"></i> ميزات تحسين التخزين</h3>
+                <ul>
+                    <li>فصل البيانات المشتركة عن البيانات الخاصة</li>
+                    <li>استخدام معرفات فريدة لتقليل التكرار</li>
+                    <li>ضغط البيانات تلقائياً</li>
+                    <li>تحسين أداء البحث والاستعلام</li>
+                </ul>
+            </div>
+            <div class="file-selection-buttons">
+                <button id="select-json-file" class="btn btn-primary">
+                    <i class="fas fa-file-code"></i> اختيار ملف JSON
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>تدبير مكتب الضبط</h2>
+        </div>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="#" class="menu-link active" data-section="home" aria-label="الرئيسية">
+                    <i class="fas fa-home"></i>
+                    <span>الرئيسية</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="menu-link" data-section="add-mail" aria-label="اضافة بريد">
+                    <i class="fas fa-envelope"></i>
+                    <span>اضافة بريد</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="menu-link" data-section="search" aria-label="البحث">
+                    <i class="fas fa-search"></i>
+                    <span>البحث</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="menu-link" data-section="task-management" aria-label="ادارة المهام">
+                    <i class="fas fa-tasks"></i>
+                    <span>ادارة المهام</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="menu-link" data-section="knowledge-map" aria-label="تحديث البيانات">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>تحديث البيانات</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="menu-link" data-section="storage-stats" aria-label="إحصائيات التخزين">
+                    <i class="fas fa-database"></i>
+                    <span>إحصائيات التخزين</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <button class="menu-toggle" id="menu-toggle" aria-label="فتح القائمة">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <div id="home-section" class="content-section">
+            <div class="container">
+                <div class="header">
+                    <h1>تطبيق تدبير مكتب الضبط</h1>
+                    <p>نظام إدارة المراسلات الواردة والصادرة مع تحسين التخزين</p>
+                </div>
+                <div class="home-container">
+                    <div class="filter-section">
+                        <h2><i class="fas fa-filter"></i> فلتر حسب الفترة</h2>
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label for="filter-period">الفترة</label>
+                                <select id="filter-period">
+                                    <option value="today">اليوم</option>
+                                    <option value="week">هذا الأسبوع</option>
+                                    <option value="month" selected>هذا الشهر</option>
+                                    <option value="quarter">هذا الربع</option>
+                                    <option value="year">هذه السنة</option>
+                                    <option value="custom">مخصص</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="filter-start-date">من تاريخ</label>
+                                <input type="date" id="filter-start-date">
+                            </div>
+                            <div class="filter-group">
+                                <label for="filter-end-date">إلى تاريخ</label>
+                                <input type="date" id="filter-end-date">
+                            </div>
+                        </div>
+                        <button type="button" id="apply-filter" class="btn btn-primary">
+                            <i class="fas fa-check"></i> تطبيق الفلتر
+                        </button>
+                    </div>
+                    
+                    <div class="stats-container">
+                        <div class="stat-card incoming">
+                            <i class="fas fa-envelope-open-text"></i>
+                            <h3 id="incoming-count">0</h3> <p>البريد الوارد</p>
+                        </div>
+                        <div class="stat-card outgoing">
+                            <i class="fas fa-paper-plane"></i>
+                            <h3 id="outgoing-count">0</h3> <p>البريد الصادر</p>
+                        </div>
+                        <div class="stat-card rejected">
+                            <i class="fas fa-times-circle"></i>
+                            <h3 id="rejected-count">0</h3> <p>البريد المرفوض</p>
+                        </div>
+                        <div class="stat-card distributed">
+                            <i class="fas fa-share-alt"></i>
+                            <h3 id="distributed-count">0</h3> <p>البريد الموزع</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="add-mail-section" class="content-section hidden">
+            <div class="container">
+                <div class="header">
+                    <h1>إضافة بريد</h1>
+                    <p>نظام إدارة المراسلات الواردة والصادرة</p>
+                </div>
+
+                <div id="notification" class="notification hidden">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="notification-message"></span>
+                </div>
+
+                <div id="data-update-status" class="data-update-status hidden">
+                    <i class="fas fa-check-circle"></i>
+                    <span>تم تحميل بيانات الموظفين بنجاح</span>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active" data-tab="incoming">البريد الوارد</div>
+                    <div class="tab" data-tab="outgoing">البريد الصادر</div>
+                </div>
+
+                <div id="incoming-tab" class="tab-content active">
+                    <form id="incoming-form">
+                        <div class="form-section">
+                            <h2><i class="fas fa-envelope-open-text"></i> معلومات البريد الوارد</h2>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="sending-location" class="required">مقر الإرسال</label>
+                                    <select id="sending-location" name="sending-location" required>
+                                        <option value="">-- اختر مقر الإرسال --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group autocomplete-container">
+                                    <label for="sending-number" class="required">رقم الإرسال</label>
+                                    <input type="text" id="sending-number" name="sending-number" required>
+                                    <div id="sending-number-autocomplete" class="autocomplete-items hidden" role="listbox"></div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="receipt-date" class="required">تاريخ التوصل</label>
+                                    <input type="date" id="receipt-date" name="receipt-date" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="correspondence-type" class="required">نوع المراسلة</label>
+                                    <select id="correspondence-type" name="correspondence-type" required>
+                                        <option value="">-- اختر نوع المراسلة --</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div id="permanence-fields" class="form-row hidden">
+                                <div class="form-group">
+                                    <label for="permanence-period">فترة الديمومة</label>
+                                    <input type="text" id="permanence-period" name="permanence-period">
+                                </div>
+                                <div class="form-group">
+                                    <label for="permanence-year">سنة الديمومة</label>
+                                    <select id="permanence-year" name="permanence-year">
+                                        <option value="">-- اختر السنة --</option>
+                                        <option value="2025">2025</option>
+                                        <option value="2024">2024</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="agency-presidency" class="required">نيابة او رئاسة</label>
+                                    <select id="agency-presidency" name="agency-presidency" required>
+                                        <option value="">-- اختر --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="draft-date" class="required">تاريخ التحرير</label>
+                                    <input type="date" id="draft-date" name="draft-date" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group autocomplete-container">
+                                    <label for="assignee" class="required">المكلف</label>
+                                    <input type="text" id="assignee" name="assignee" placeholder="ابحث عن الموظف..." required>
+                                    <div id="assignee-autocomplete" class="autocomplete-items hidden" role="listbox"></div>
+                                    <input type="hidden" id="assignee-id" name="assignee-id">
+                                </div>
+                                <div class="form-group">
+                                    <label for="mail-count" class="required">عدد المراسلات</label>
+                                    <input type="number" id="mail-count" name="mail-count" min="1" value="1" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h2><i class="fas fa-users"></i> الموظفون المعنيون</h2>
+                            
+                            <div id="employees-container">
+                                </div>
+                            
+                            <button type="button" id="add-employee" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> إضافة موظف آخر
+                            </button>
+                        </div>
+
+                        <div class="form-section">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> حفظ البريد الوارد
+                            </button>
+                            <button type="reset" class="btn btn-success">
+                                <i class="fas fa-redo"></i> إعادة تعيين
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="outgoing-tab" class="tab-content">
+                    <div class="form-section">
+                        <h2><i class="fas fa-reply"></i> إنشاء بريد صادر</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="outgoing-search">ابحث عن البريد الوارد للرد عليه</label>
+                                <div class="autocomplete-container">
+                                    <input type="text" id="outgoing-search" placeholder="ابحث عن بريد وارد...">
+                                    <div id="outgoing-search-autocomplete" class="autocomplete-items hidden" role="listbox"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="selected-incoming-mail" class="form-section hidden">
+                        <h2>تفاصيل البريد الوارد</h2>
+                        <div id="incoming-mail-details"></div>
+                        <button type="button" id="reply-to-incoming" class="btn btn-primary">
+                            <i class="fas fa-reply"></i> رد
+                        </button>
+                    </div>
+
+                    <div id="outgoing-form-container" class="form-section hidden">
+                        <h2><i class="fas fa-reply"></i> معلومات البريد الصادر</h2>
+                        <form id="outgoing-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="outgoing-reference" class="required">رقم البريد الوارد المرتبط</label>
+                                    <input type="text" id="outgoing-reference" name="outgoing-reference" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="outgoing-number" class="required">رقم البريد الصادر</label>
+                                    <input type="text" id="outgoing-number" name="outgoing-number" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="outgoing-date" class="required">تاريخ الإرسال</label>
+                                    <input type="date" id="outgoing-date" name="outgoing-date" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="subject" class="required">موضوع الإرسال</label>
+                                    <input type="text" id="subject" name="subject" required>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h2><i class="fas fa-users"></i> الموظفون المعنيون</h2>
+                                
+                                <div id="employees-selection-container" class="hidden">
+                                    <h3>اختر الموظفين المعنيين من البريد الوارد:</h3>
+                                    <div id="employees-selection-list">
+                                        </div>
+                                </div>
+                                
+                                <div id="selected-employees-container">
+                                    </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h2><i class="fas fa-paperclip"></i> الوثائق المرفقة</h2>
+                                
+                                <div id="attachments-container">
+                                    </div>
+                                
+                                <button type="button" id="add-attachment" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> إضافة رابط PDF
+                                </button>
+                            </div>
+
+                            <div class="form-section">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> حفظ البريد الصادر
+                                </button>
+                                <button type="reset" class="btn btn-success">
+                                    <i class="fas fa-redo"></i> إعادة تعيين
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- نموذج الرد على البريد الصادر -->
+                    <div id="reply-to-outgoing-form-container" class="form-section hidden">
+                        <h2><i class="fas fa-reply"></i> الرد على بريد صادر</h2>
+                        <div id="outgoing-mail-details"></div>
+                        
+                        <div class="registration-info">
+                            <h4>معلومات التسجيل</h4>
+                            <p><strong>رقم التسجيل:</strong> <span id="reply-registration-number"></span></p>
+                            <p><strong>تاريخ الرد:</strong> <span id="reply-date"></span></p>
+                        </div>
+                        
+                        <div class="persons-list">
+                            <h4>المعنيون بالرد</h4>
+                            <p>يرجى اختيار الأشخاص الذين قاموا بالرد علينا:</p>
+                            <div id="reply-persons-list">
+                                <!-- سيتم ملؤه ديناميكيًا -->
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <button type="button" id="save-reply" class="btn btn-primary">
+                                <i class="fas fa-save"></i> حفظ الرد
+                            </button>
+                            <button type="button" id="cancel-reply" class="btn btn-danger">
+                                <i class="fas fa-times"></i> إلغاء
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="search-section" class="content-section hidden">
+            <div class="container">
+                <div class="header">
+                    <h1>البحث عن المراسلات</h1>
+                    <p>ابحث عن البريد الوارد أو الصادر</p>
+                </div>
+                <div class="search-container">
+                    <div class="search-filters">
+                        <div class="form-group">
+                            <label for="search-type">نوع البحث</label>
+                            <select id="search-type">
+                                <option value="all">الكل</option>
+                                <option value="incoming">البريد الوارد</option>
+                                <option value="outgoing">البريد الصادر</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="search-location">مقر العمل</label>
+                            <select id="search-location">
+                                <option value="">-- اختر مقر العمل --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="search-term">كلمة البحث</label>
+                            <input type="text" id="search-term" class="search-input" placeholder="اكتب رقم البريد أو الموضوع...">
+                        </div>
+                    </div>
+                    <button type="button" id="search-mail" class="btn btn-primary">
+                        <i class="fas fa-search"></i> بحث
+                    </button>
+                    <div id="search-results" class="search-results">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="task-management-section" class="content-section hidden">
+            <div class="container">
+                <div class="header">
+                    <h1>إدارة المهام</h1>
+                    <p>تتبع وإدارة المهام</p>
+                </div>
+                <div class="task-management-container">
+                    <div class="form-section">
+                        <h2><i class="fas fa-plus"></i> إضافة مهمة جديدة</h2>
+                        <form id="task-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="task-title" class="required">عنوان المهمة</label>
+                                    <input type="text" id="task-title" name="task-title" required>
+                                </div>
+                                <div class="form-group autocomplete-container">
+                                    <label for="task-assignee" class="required">الموظف المسند إليه</label>
+                                    <input type="text" id="task-assignee" name="task-assignee" placeholder="ابحث عن الموظف..." required>
+                                    <div id="task-assignee-autocomplete" class="autocomplete-items hidden" role="listbox"></div>
+                                    <input type="hidden" id="task-assignee-id" name="task-assignee-id">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="task-deadline" class="required">تاريخ الانتهاء</label>
+                                    <input type="date" id="task-deadline" name="task-deadline" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="task-status" class="required">حالة المهمة</label>
+                                    <select id="task-status" name="task-status" required>
+                                        <option value="pending">قيد الانتظار</option>
+                                        <option value="in-progress">قيد التنفيذ</option>
+                                        <option value="completed">مكتملة</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="task-description">وصف المهمة</label>
+                                    <textarea id="task-description" name="task-description" rows="4"></textarea>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> حفظ المهمة
+                                </button>
+                                <button type="reset" class="btn btn-success">
+                                    <i class="fas fa-redo"></i> إعادة تعيين
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h2><i class="fas fa-list"></i> قائمة المهام</h2>
+                        <div id="task-list" class="task-list">
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="knowledge-map-section" class="content-section hidden">
+            <div class="container">
+                <div class="header">
+                    <h1>تحديث البيانات</h1>
+                    <p>تحديث بيانات الموظفين من ملف Excel</p>
+                </div>
+                <div class="knowledge-map-container">
+                    <div class="form-section">
+                        <h2><i class="fas fa-upload"></i> رفع ملف بيانات الموظفين</h2>
+                        <div class="knowledge-map-form">
+                            <div class="file-upload">
+                                <input type="file" id="knowledge-map-file" accept=".xlsx,.xls">
+                                <label for="knowledge-map-file" class="file-upload-label">
+                                    <i class="fas fa-upload"></i> اختر ملف Excel
+                                </label>
+                            </div>
+                            <div id="knowledge-file-info" class="file-info hidden">
+                                لم يتم اختيار ملف بعد
+                            </div>
+                            <button type="button" id="process-knowledge-map" class="btn btn-primary">
+                                <i class="fas fa-cogs"></i> معالجة الملف
+                            </button>
+                        </div>
+                        
+                        <div class="excel-info">
+                            <h3><i class="fas fa-info-circle"></i> متطلبات ملف Excel</h3>
+                            <ul>
+                                <li>يجب أن يكون الملف بصيغة Excel (.xlsx أو .xls)</li>
+                                <li>الحقل الأول يجب أن يحتوي على رقم التأجير (PPR)</li>
+                                <li>الحقل الثاني يجب أن يحتوي على اسم الموظف</li>
+                                <li>سيتم تجاهل أي أعمدة إضافية في الملف</li>
+                                <li>يجب أن تكون البيانات في ورقة العمل الأولى</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="storage-stats-section" class="content-section hidden">
+            <div class="container">
+                <div class="header">
+                    <h1>إحصائيات التخزين</h1>
+                    <p>تحليل كفاءة تخزين البيانات</p>
+                </div>
+                <div class="home-container">
+                    <div class="data-optimization-info">
+                        <h3><i class="fas fa-chart-pie"></i> تحليل أداء التخزين</h3>
+                        <p>يستخدم التطبيق بنية بيانات محسنة لتقليل التكرار وتحسين الأداء:</p>
+                        <ul>
+                            <li><strong>فصل البيانات:</strong> البيانات المشتركة تخزن مرة واحدة فقط</li>
+                            <li><strong>معرفات فريدة:</strong> استخدام IDs بدلاً من تكرار البيانات</li>
+                            <li><strong>ضغط البيانات:</strong> تقليل حجم الملف بنسبة تصل إلى 60%</li>
+                            <li><strong>تحسين الأداء:</strong> تسريع عمليات البحث والاستعلام</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="storage-stats">
+                        <div class="storage-stat">
+                            <h4>حجم البيانات</h4>
+                            <p id="data-size">0 KB</p>
+                        </div>
+                        <div class="storage-stat">
+                            <h4>عدد السجلات</h4>
+                            <p id="record-count">0</p>
+                        </div>
+                        <div class="storage-stat">
+                            <h4>معدل الضغط</h4>
+                            <p id="compression-rate">0%</p>
+                        </div>
+                        <div class="storage-stat">
+                            <h4>توفير المساحة</h4>
+                            <p id="space-saved">0 KB</p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h2><i class="fas fa-tools"></i> أدوات الصيانة</h2>
+                        <div class="form-row">
+                            <button type="button" id="optimize-data" class="btn btn-primary">
+                                <i class="fas fa-compress"></i> تحسين البيانات
+                            </button>
+                            <button type="button" id="clean-duplicates" class="btn btn-info">
+                                <i class="fas fa-broom"></i> حذف المكررات
+                            </button>
+                            <button type="button" id="export-report" class="btn btn-success">
+                                <i class="fas fa-file-export"></i> تصدير تقرير
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // بيانات التطبيق مع بنية محسنة
+            let appData = {
+                // البيانات المرجعية (تخزن مرة واحدة)
+                referenceData: {
+                    employees: [],
+                    locations: [],
+                    correspondenceTypes: [],
+                    agencies: []
+                },
+                
+                // بيانات المراسلات (تستخدم معرفات للإشارة للبيانات المرجعية)
+                incomingMail: [],
+                outgoingMail: [],
+                tasks: [],
+                
+                // معلومات النظام
+                systemInfo: {
+                    version: "2.0",
+                    lastOptimized: null,
+                    dataStructure: "optimized"
+                }
+            };
+
+            // متغيرات عامة
+            let employeeCount = 0;
+            let attachmentCount = 0;
+            let selectedIncomingMail = null;
+            let selectedOutgoingMail = null;
+            let selectedEmployees = [];
+            let debounceTimer;
+            let dataFileHandle = null;
+            let replyRegistrationNumber = '';
+
+            // الحصول على العناصر الأساسية
+            const fileSelectionModal = document.getElementById('file-selection-modal');
+            const selectJsonFileBtn = document.getElementById('select-json-file');
+            const menuLinks = document.querySelectorAll('.menu-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            const filterPeriod = document.getElementById('filter-period');
+            const filterStartDate = document.getElementById('filter-start-date');
+            const filterEndDate = document.getElementById('filter-end-date');
+            const applyFilterBtn = document.getElementById('apply-filter');
+            const searchType = document.getElementById('search-type');
+            const searchLocation = document.getElementById('search-location');
+            const searchTerm = document.getElementById('search-term');
+            const searchMailBtn = document.getElementById('search-mail');
+            const searchResults = document.getElementById('search-results');
+            const knowledgeMapFile = document.getElementById('knowledge-map-file');
+            const knowledgeFileInfo = document.getElementById('knowledge-file-info');
+            const processKnowledgeMapBtn = document.getElementById('process-knowledge-map');
+            const taskForm = document.getElementById('task-form');
+            const taskList = document.getElementById('task-list');
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const correspondenceType = document.getElementById('correspondence-type');
+            const permanenceFields = document.getElementById('permanence-fields');
+            const sendingNumber = document.getElementById('sending-number');
+            const sendingNumberAutocomplete = document.getElementById('sending-number-autocomplete');
+            const sendingLocation = document.getElementById('sending-location');
+            const addEmployeeBtn = document.getElementById('add-employee');
+            const employeesContainer = document.getElementById('employees-container');
+            const incomingForm = document.getElementById('incoming-form');
+            const outgoingSearch = document.getElementById('outgoing-search');
+            const outgoingSearchAutocomplete = document.getElementById('outgoing-search-autocomplete');
+            const selectedIncomingMailDiv = document.getElementById('selected-incoming-mail');
+            const incomingMailDetails = document.getElementById('incoming-mail-details');
+            const replyToIncomingBtn = document.getElementById('reply-to-incoming');
+            const outgoingFormContainer = document.getElementById('outgoing-form-container');
+            const outgoingForm = document.getElementById('outgoing-form');
+            const outgoingReference = document.getElementById('outgoing-reference');
+            const outgoingNumber = document.getElementById('outgoing-number');
+            const outgoingDate = document.getElementById('outgoing-date');
+            const subject = document.getElementById('subject');
+            const employeesSelectionContainer = document.getElementById('employees-selection-container');
+            const employeesSelectionList = document.getElementById('employees-selection-list');
+            const selectedEmployeesContainer = document.getElementById('selected-employees-container');
+            const addAttachmentBtn = document.getElementById('add-attachment');
+            const attachmentsContainer = document.getElementById('attachments-container');
+            const assigneeInput = document.getElementById('assignee');
+            const assigneeAutocomplete = document.getElementById('assignee-autocomplete');
+            const assigneeIdInput = document.getElementById('assignee-id');
+            const taskAssigneeInput = document.getElementById('task-assignee');
+            const taskAssigneeAutocomplete = document.getElementById('task-assignee-autocomplete');
+            const taskAssigneeIdInput = document.getElementById('task-assignee-id');
+            const dataUpdateStatus = document.getElementById('data-update-status');
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const mailCount = document.getElementById('mail-count');
+            const agencyPresidency = document.getElementById('agency-presidency');
+            
+            // عناصر نموذج الرد على البريد الصادر
+            const replyToOutgoingFormContainer = document.getElementById('reply-to-outgoing-form-container');
+            const outgoingMailDetails = document.getElementById('outgoing-mail-details');
+            const replyRegistrationNumberSpan = document.getElementById('reply-registration-number');
+            const replyDateSpan = document.getElementById('reply-date');
+            const replyPersonsList = document.getElementById('reply-persons-list');
+            const saveReplyBtn = document.getElementById('save-reply');
+            const cancelReplyBtn = document.getElementById('cancel-reply');
+            
+            // عناصر قسم إحصائيات التخزين
+            const dataSizeSpan = document.getElementById('data-size');
+            const recordCountSpan = document.getElementById('record-count');
+            const compressionRateSpan = document.getElementById('compression-rate');
+            const spaceSavedSpan = document.getElementById('space-saved');
+            const optimizeDataBtn = document.getElementById('optimize-data');
+            const cleanDuplicatesBtn = document.getElementById('clean-duplicates');
+            const exportReportBtn = document.getElementById('export-report');
+
+            // تهيئة التطبيق
+            initializeApp();
+
+            function initializeApp() {
+                // تعيين تواريخ اليوم كقيم افتراضية
+                setDefaultDates();
+                
+                // إضافة موظف واحد بشكل افتراضي
+                addEmployeeEntry();
+                
+                // إضافة مستمعي الأحداث
+                setupEventListeners();
+                
+                // عرض نافذة اختيار الملف مباشرة
+                fileSelectionModal.style.display = 'flex';
+            }
+
+            function setDefaultDates() {
+                const currentDate = new Date();
+                const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+                const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+                
+                filterStartDate.value = formatDateForInput(firstDayOfMonth);
+                filterEndDate.value = formatDateForInput(lastDayOfMonth);
+
+                // تطبيق الفلتر الافتراضي عند التحميل
+                handleApplyFilter();
+            }
+
+            function setupEventListeners() {
+                // اختيار ملف JSON
+                selectJsonFileBtn.addEventListener('click', async function() {
+                    try {
+                        // التحقق من دعم File System Access API
+                        if ('showOpenFilePicker' in window) {
+                            const options = {
+                                types: [
+                                    {
+                                        description: 'JSON Files',
+                                        accept: {
+                                            'application/json': ['.json'],
+                                        },
+                                    },
+                                ],
+                                suggestedName: 'mail-data.json',
+                            };
+                            
+                            [dataFileHandle] = await window.showOpenFilePicker(options);
+                            
+                            // قراءة البيانات من الملف
+                            const file = await dataFileHandle.getFile();
+                            const contents = await file.text();
+                            
+                            loadData(contents);
+                            
+                        } else {
+                            // استخدام الطريقة التقليدية لاختيار الملفات
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = '.json';
+                            
+                            input.onchange = async function(e) {
+                                const file = e.target.files[0];
+                                if (file) {
+                                    const reader = new FileReader();
+                                    
+                                    reader.onload = async function(event) {
+                                        loadData(event.target.result);
+                                    };
+                                    
+                                    reader.onerror = function() {
+                                        showNotification('حدث خطأ أثناء قراءة الملف', 'error');
+                                    };
+                                    
+                                    reader.readAsText(file);
+                                }
+                            };
+                            
+                            input.click();
+                        }
+                    } catch (error) {
+                        console.error('Error selecting JSON file:', error);
+                        if (error.name !== 'AbortError') {
+                            showNotification('حدث خطأ أثناء اختيار ملف البيانات', 'error');
+                        }
+                    }
+                });
+
+                // زر تبديل القائمة للموبايل
+                menuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                });
+
+                // التنقل في القائمة الجانبية
+                menuLinks.forEach(link => {
+                    link.addEventListener('click', handleMenuClick);
+                });
+
+                // فلتر الفترة
+                filterPeriod.addEventListener('change', handlePeriodChange);
+                applyFilterBtn.addEventListener('click', handleApplyFilter);
+
+                // البحث عن المراسلات
+                searchMailBtn.addEventListener('click', handleMailSearch);
+                searchTerm.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        handleMailSearch();
+                    }
+                });
+
+                // رفع ملف بيانات الموظفين
+                knowledgeMapFile.addEventListener('change', handleKnowledgeMapFileChange);
+                processKnowledgeMapBtn.addEventListener('click', handleProcessKnowledgeMap);
+
+                // نموذج المهام
+                taskForm.addEventListener('submit', handleTaskFormSubmit);
+
+                // تبويبات البريد الوارد والصادر
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', handleTabClick);
+                });
+
+                // نوع المراسلة
+                correspondenceType.addEventListener('change', handleCorrespondenceTypeChange);
+
+                // البحث التلقائي لرقم الإرسال
+                sendingNumber.addEventListener('input', debounce(() => handleAutocomplete(sendingNumber, sendingNumberAutocomplete, appData.incomingMail), 300));
+
+                // البحث التلقائي للبريد الوارد في نموذج البريد الصادر
+                outgoingSearch.addEventListener('input', debounce(() => handleAutocomplete(outgoingSearch, outgoingSearchAutocomplete, appData.incomingMail, true), 300));
+
+                // البحث التلقائي للمكلف
+                assigneeInput.addEventListener('input', debounce(() => handleEmployeeAutocomplete(assigneeInput, assigneeAutocomplete, assigneeIdInput), 300));
+
+                // البحث التلقائي للموظف في المهام
+                taskAssigneeInput.addEventListener('input', debounce(() => handleEmployeeAutocomplete(taskAssigneeInput, taskAssigneeAutocomplete, taskAssigneeIdInput), 300));
+
+                // إضافة موظف جديد
+                addEmployeeBtn.addEventListener('click', addEmployeeEntry);
+
+                // نموذج البريد الوارد
+                incomingForm.addEventListener('submit', handleIncomingFormSubmit);
+
+                // زر الرد على البريد الوارد
+                replyToIncomingBtn.addEventListener('click', handleReplyToIncoming);
+
+                // إضافة مرفق PDF
+                addAttachmentBtn.addEventListener('click', addAttachment);
+
+                // نموذج البريد الصادر
+                outgoingForm.addEventListener('submit', handleOutgoingFormSubmit);
+
+                // أزرار نموذج الرد على البريد الصادر
+                saveReplyBtn.addEventListener('click', handleSaveReply);
+                cancelReplyBtn.addEventListener('click', handleCancelReply);
+
+                // أزرار قسم إحصائيات التخزين
+                optimizeDataBtn.addEventListener('click', handleOptimizeData);
+                cleanDuplicatesBtn.addEventListener('click', handleCleanDuplicates);
+                exportReportBtn.addEventListener('click', handleExportReport);
+
+                // إخفاء قوائم الاقتراحات عند النقر خارجها
+                document.addEventListener('click', handleDocumentClick);
+            }
+
+            // دالة موحدة لتحميل البيانات وتحديث الواجهة
+            function loadData(jsonContents) {
+                try {
+                    const data = JSON.parse(jsonContents);
+                    
+                    // تحديث البيانات مع دعم الهيكل القديم والجديد
+                    if (data.referenceData) {
+                        // الهيكل الجديد المحسن
+                        appData = {
+                            ...appData,
+                            ...data
+                        };
+                    } else {
+                        // الهيكل القديم - تحويله إلى الهيكل الجديد
+                        convertToOptimizedStructure(data);
+                    }
+                    
+                    // تحديث واجهة المستخدم
+                    updateReferenceDataUI();
+                    updateStatsBasedOnFilter(new Date(filterStartDate.value), new Date(filterEndDate.value));
+                    renderTaskList(); // عرض المهام
+                    updateStorageStats(); // تحديث إحصائيات التخزين
+                    
+                    // إخفاء النافذة المنبثقة
+                    fileSelectionModal.style.display = 'none';
+                    
+                    showNotification('تم تحميل بيانات التطبيق بنجاح', 'success');
+
+                    if (appData.referenceData.employees.length > 0) {
+                        dataUpdateStatus.classList.remove('hidden');
+                        dataUpdateStatus.classList.add('active');
+                    }
+
+                } catch (error) {
+                    console.error('Error parsing JSON file:', error);
+                    showNotification('حدث خطأ أثناء قراءة ملف البيانات', 'error');
+                }
+            }
+
+            // تحويل الهيكل القديم إلى الهيكل الجديد المحسن
+            function convertToOptimizedStructure(oldData) {
+                // استخراج البيانات المرجعية الفريدة
+                const uniqueEmployees = new Map();
+                const uniqueLocations = new Map();
+                const uniqueCorrespondenceTypes = new Map();
+                const uniqueAgencies = new Map();
+                
+                // معالجة الموظفين
+                if (oldData.employees) {
+                    oldData.employees.forEach(emp => {
+                        const key = `${emp.number}-${emp.name}`;
+                        if (!uniqueEmployees.has(key)) {
+                            uniqueEmployees.set(key, {
+                                id: emp.id || generateId(),
+                                number: emp.number,
+                                name: emp.name
+                            });
+                        }
+                    });
+                }
+                
+                // معالجة المواقع
+                if (oldData.incomingMail) {
+                    oldData.incomingMail.forEach(mail => {
+                        if (mail.sendingLocation && !uniqueLocations.has(mail.sendingLocation)) {
+                            uniqueLocations.set(mail.sendingLocation, {
+                                id: generateId(),
+                                name: mail.sendingLocation
+                            });
+                        }
+                    });
+                }
+                
+                // معالجة أنواع المراسلات
+                const correspondenceTypeMap = {
+                    'permanence': 'الديمومة',
+                    'internal-mission': 'امر بمهمة داخلية',
+                    'mobile-sessions': 'لجلسات التنقلية',
+                    'decided-compensation': 'تعويض مقرر',
+                    'delegation': 'الانتداب',
+                    'miscellaneous': 'مختلفات'
+                };
+                
+                Object.keys(correspondenceTypeMap).forEach(key => {
+                    uniqueCorrespondenceTypes.set(key, {
+                        id: key,
+                        name: correspondenceTypeMap[key]
+                    });
+                });
+                
+                // معالجة الوكالات
+                uniqueAgencies.set('agency', { id: 'agency', name: 'نيابة' });
+                uniqueAgencies.set('presidency', { id: 'presidency', name: 'رئاسة' });
+                
+                // تحديث البيانات المرجعية
+                appData.referenceData = {
+                    employees: Array.from(uniqueEmployees.values()),
+                    locations: Array.from(uniqueLocations.values()),
+                    correspondenceTypes: Array.from(uniqueCorrespondenceTypes.values()),
+                    agencies: Array.from(uniqueAgencies.values())
+                };
+                
+                // تحويل المراسلات الواردة
+                if (oldData.incomingMail) {
+                    appData.incomingMail = oldData.incomingMail.map(mail => {
+                        // البحث عن المعرفات المرجعية
+                        const location = appData.referenceData.locations.find(loc => loc.name === mail.sendingLocation);
+                        const correspondenceType = appData.referenceData.correspondenceTypes.find(ct => ct.id === mail.correspondenceType);
+                        const agency = appData.referenceData.agencies.find(a => a.id === mail.agencyPresidency);
+                        
+                        // تحويل الموظفين
+                        const employees = mail.employees.map(emp => {
+                            const refEmployee = Array.from(uniqueEmployees.values()).find(e => 
+                                e.number === emp.number && e.name === emp.name
+                            );
+                            return {
+                                employeeId: refEmployee ? refEmployee.id : generateId(),
+                                status: emp.status,
+                                rejectionReason: emp.rejectionReason,
+                                mail: emp.mail
+                            };
+                        });
+                        
+                        return {
+                            id: mail.id || generateId(),
+                            sendingLocationId: location ? location.id : null,
+                            sendingNumber: mail.sendingNumber,
+                            receiptDate: mail.receiptDate,
+                            correspondenceTypeId: correspondenceType ? correspondenceType.id : null,
+                            agencyPresidencyId: agency ? agency.id : null,
+                            draftDate: mail.draftDate,
+                            assigneeId: mail.assignee ? mail.assignee.id : null,
+                            mailCount: mail.mailCount || 1,
+                            employees: employees,
+                            outgoingMails: mail.outgoingMails || [],
+                            registration: mail.registration
+                        };
+                    });
+                }
+                
+                // تحويل المراسلات الصادرة
+                if (oldData.outgoingMail) {
+                    appData.outgoingMail = oldData.outgoingMail.map(mail => {
+                        // تحويل الموظفين
+                        const employees = mail.employees.map(emp => {
+                            const refEmployee = Array.from(uniqueEmployees.values()).find(e => 
+                                e.number === emp.number && e.name === emp.name
+                            );
+                            return {
+                                employeeId: refEmployee ? refEmployee.id : generateId(),
+                                outgoingCount: emp.outgoingCount,
+                                incomingCount: emp.incomingCount
+                            };
+                        });
+                        
+                        return {
+                            id: mail.id || generateId(),
+                            number: mail.number,
+                            date: mail.date,
+                            subject: mail.subject,
+                            attachments: mail.attachments,
+                            employees: employees,
+                            incomingMailId: mail.incomingMailId
+                        };
+                    });
+                }
+                
+                // تحويل المهام
+                if (oldData.tasks) {
+                    appData.tasks = oldData.tasks.map(task => ({
+                        ...task,
+                        id: task.id || generateId()
+                    }));
+                }
+            }
+
+            // تحديث واجهة المستخدم بالبيانات المرجعية
+            function updateReferenceDataUI() {
+                // تحديث قائمة المواقع
+                const locationSelect = document.getElementById('sending-location');
+                locationSelect.innerHTML = '<option value="">-- اختر مقر الإرسال --</option>';
+                appData.referenceData.locations.forEach(location => {
+                    const option = document.createElement('option');
+                    option.value = location.id;
+                    option.textContent = location.name;
+                    locationSelect.appendChild(option);
+                });
+                
+                // تحديث قائمة أنواع المراسلات
+                const correspondenceTypeSelect = document.getElementById('correspondence-type');
+                correspondenceTypeSelect.innerHTML = '<option value="">-- اختر نوع المراسلة --</option>';
+                appData.referenceData.correspondenceTypes.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type.id;
+                    option.textContent = type.name;
+                    correspondenceTypeSelect.appendChild(option);
+                });
+                
+                // تحديث قائمة الوكالات
+                const agencySelect = document.getElementById('agency-presidency');
+                agencySelect.innerHTML = '<option value="">-- اختر --</option>';
+                appData.referenceData.agencies.forEach(agency => {
+                    const option = document.createElement('option');
+                    option.value = agency.id;
+                    option.textContent = agency.name;
+                    agencySelect.appendChild(option);
+                });
+                
+                // تحديث قائمة المواقع في البحث
+                const searchLocationSelect = document.getElementById('search-location');
+                searchLocationSelect.innerHTML = '<option value="">-- اختر مقر العمل --</option>';
+                appData.referenceData.locations.forEach(location => {
+                    const option = document.createElement('option');
+                    option.value = location.id;
+                    option.textContent = location.name;
+                    searchLocationSelect.appendChild(option);
+                });
+            }
+
+            // معالجات الأحداث
+            function handleMenuClick(e) {
+                e.preventDefault();
+                
+                const targetSection = this.getAttribute('data-section');
+                
+                // تحديث عنصر القائمة النشط
+                menuLinks.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                // إظهار القسم المستهدف
+                contentSections.forEach(section => {
+                    section.classList.add('hidden');
+                });
+                
+                const targetSectionElement = document.getElementById(`${targetSection}-section`);
+                if (targetSectionElement) {
+                    targetSectionElement.classList.remove('hidden');
+                    
+                    // إذا كان قسم إحصائيات التخزين، قم بتحديث الإحصائيات
+                    if (targetSection === 'storage-stats') {
+                        updateStorageStats();
+                    }
+                }
+            }
+
+            function handlePeriodChange() {
+                const period = this.value;
+                const today = new Date();
+                
+                switch(period) {
+                    case 'today':
+                        filterStartDate.value = formatDateForInput(today);
+                        filterEndDate.value = formatDateForInput(today);
+                        break;
+                    case 'week':
+                        const firstDayOfWeek = new Date(today);
+                        // تعديل ليلائم بداية الأسبوع (مثال: الأحد)
+                        firstDayOfWeek.setDate(today.getDate() - today.getDay()); 
+                        const lastDayOfWeek = new Date(firstDayOfWeek);
+                        lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 6);
+                        filterStartDate.value = formatDateForInput(firstDayOfWeek);
+                        filterEndDate.value = formatDateForInput(lastDayOfWeek);
+                        break;
+                    case 'month':
+                        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                        const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                        filterStartDate.value = formatDateForInput(firstDayOfMonth);
+                        filterEndDate.value = formatDateForInput(lastDayOfMonth);
+                        break;
+                    case 'quarter':
+                        const quarter = Math.floor(today.getMonth() / 3);
+                        const firstDayOfQuarter = new Date(today.getFullYear(), quarter * 3, 1);
+                        const lastDayOfQuarter = new Date(today.getFullYear(), (quarter + 1) * 3, 0);
+                        filterStartDate.value = formatDateForInput(firstDayOfQuarter);
+                        filterEndDate.value = formatDateForInput(lastDayOfQuarter);
+                        break;
+                    case 'year':
+                        const firstDayOfYear = new Date(today.getFullYear(), 0, 1);
+                        const lastDayOfYear = new Date(today.getFullYear(), 11, 31);
+                        filterStartDate.value = formatDateForInput(firstDayOfYear);
+                        filterEndDate.value = formatDateForInput(lastDayOfYear);
+                        break;
+                    case 'custom':
+                        // الاحتفاظ بالتواريخ الحالية
+                        break;
+                }
+            }
+
+            function handleApplyFilter() {
+                const startDate = new Date(filterStartDate.value);
+                const endDate = new Date(filterEndDate.value);
+                
+                // في تطبيق حقيقي، سيتم جلب البيانات من الخادم بناءً على الفلتر
+                updateStatsBasedOnFilter(startDate, endDate);
+            }
+
+            function handleMailSearch() {
+                const type = searchType.value;
+                const locationId = searchLocation.value;
+                const term = searchTerm.value.toLowerCase().trim();
+                
+                if (term === '' && locationId === '') {
+                    showNotification('يرجى إدخال كلمة البحث أو مقر العمل', 'error');
+                    return;
+                }
+                
+                let results = [];
+                
+                if (type === 'all' || type === 'incoming') {
+                    const incomingResults = appData.incomingMail.filter(mail => {
+                        const location = appData.referenceData.locations.find(loc => loc.id === mail.sendingLocationId);
+                        const matchesTerm = term === '' || 
+                            mail.sendingNumber.toLowerCase().includes(term);
+                        
+                        const matchesLocation = locationId === '' || 
+                            mail.sendingLocationId === locationId;
+                        
+                        return matchesTerm && matchesLocation;
+                    });
+                    results = results.concat(incomingResults.map(mail => ({...mail, type: 'incoming'})));
+                }
+                
+                if (type === 'all' || type === 'outgoing') {
+                    const outgoingResults = appData.outgoingMail.filter(mail => {
+                        const matchesTerm = term === '' || 
+                            mail.number.toLowerCase().includes(term) || 
+                            mail.subject.toLowerCase().includes(term);
+                        
+                        // البحث في البريد الوارد المرتبط
+                        const incomingMail = appData.incomingMail.find(im => im.id === mail.incomingMailId);
+                        const incomingLocation = incomingMail ? 
+                            appData.referenceData.locations.find(loc => loc.id === incomingMail.sendingLocationId) : null;
+                        
+                        const matchesLocation = locationId === '' || 
+                            (incomingLocation && incomingLocation.id === locationId);
+                        
+                        return matchesTerm && matchesLocation;
+                    });
+                    results = results.concat(outgoingResults.map(mail => ({...mail, type: 'outgoing'})));
+                }
+                
+                displaySearchResults(results);
+            }
+
+            function handleKnowledgeMapFileChange() {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    knowledgeFileInfo.textContent = `تم اختيار الملف: ${file.name}`;
+                    knowledgeFileInfo.classList.remove('hidden');
+                } else {
+                    knowledgeFileInfo.textContent = 'لم يتم اختيار ملف بعد';
+                }
+            }
+
+            async function handleProcessKnowledgeMap() {
+                if (!knowledgeMapFile.files || !knowledgeMapFile.files[0]) {
+                    showNotification('يرجى اختيار ملف أولاً', 'error');
+                    return;
+                }
+                
+                const file = knowledgeMapFile.files[0];
+                const fileName = file.name;
+                
+                if (!fileName.match(/\.(xlsx|xls)$/)) {
+                    showNotification('يرجى اختيار ملف Excel بصيغة .xlsx أو .xls', 'error');
+                    return;
+                }
+                
+                showNotification('جاري معالجة الملف...', 'success');
+                
+                const reader = new FileReader();
+                
+                reader.onload = async function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                        
+                        const newEmployeesData = [];
+                        
+                        // بدءاً من الصف الثاني (index 1) لتجاهل العناوين إذا وجدت
+                        // أو من الصف الأول (index 0) إذا لم تكن هناك عناوين
+                        jsonData.forEach((row, index) => {
+                            // استخدام الفهرسة المباشرة (أكثر قوة)
+                            const ppr = row[0]; // الحقل الأول
+                            const name = row[1]; // الحقل الثاني
+                                
+                            if (ppr && name) {
+                                newEmployeesData.push({
+                                    id: generateId(),
+                                    number: ppr.toString().trim(),
+                                    name: name.toString().trim()
+                                });
+                            }
+                        });
+                        
+                        if (newEmployeesData.length === 0) {
+                            showNotification('لم يتم العثور على بيانات صالحة في الملف.', 'error');
+                            return;
+                        }
+                        
+                        // دمج الموظفين الجدد مع الحاليين مع تجنب التكرار
+                        const existingEmployees = new Map(
+                            appData.referenceData.employees.map(emp => [`${emp.number}-${emp.name}`, emp])
+                        );
+                        
+                        newEmployeesData.forEach(emp => {
+                            const key = `${emp.number}-${emp.name}`;
+                            if (!existingEmployees.has(key)) {
+                                existingEmployees.set(key, emp);
+                            }
+                        });
+                        
+                        appData.referenceData.employees = Array.from(existingEmployees.values());
+                        
+                        await saveDataToFile();
+                        
+                        dataUpdateStatus.classList.remove('hidden');
+                        dataUpdateStatus.classList.add('active');
+                        
+                        showNotification('تم تحديث بيانات الموظفين بنجاح', 'success');
+                        console.log('بيانات الموظفين المحملة:', appData.referenceData.employees);
+                        
+                    } catch (error) {
+                        console.error('خطأ في معالجة ملف Excel:', error);
+                        showNotification('حدث خطأ أثناء معالجة الملف.', 'error');
+                    }
+                };
+                
+                reader.readAsArrayBuffer(file);
+            }
+
+            async function handleTaskFormSubmit(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const assigneeId = taskAssigneeIdInput.value;
+                const assignee = appData.referenceData.employees.find(emp => emp.id === assigneeId);
+
+                const newTask = {
+                    id: generateId(),
+                    title: formData.get('task-title'),
+                    assignee: assignee ? { id: assignee.id, name: assignee.name, number: assignee.number } : { name: formData.get('task-assignee') },
+                    deadline: formData.get('task-deadline'),
+                    status: formData.get('task-status'),
+                    description: formData.get('task-description')
+                };
+
+                appData.tasks.push(newTask);
+                
+                await saveDataToFile();
+                
+                renderTaskList(); // إعادة عرض القائمة المحدثة
+                
+                showNotification('تم حفظ المهمة بنجاح', 'success');
+                
+                this.reset();
+                taskAssigneeIdInput.value = ''; // مسح الحقل المخفي
+            }
+
+            function handleTabClick() {
+                const tabId = this.getAttribute('data-tab');
+                
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                this.classList.add('active');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+                
+                // إعادة تعيين نموذج البريد الصادر عند التبديل
+                if (tabId === 'outgoing') {
+                    outgoingSearch.value = '';
+                    selectedIncomingMailDiv.classList.add('hidden');
+                    outgoingFormContainer.classList.add('hidden');
+                    replyToOutgoingFormContainer.classList.add('hidden');
+                }
+            }
+
+            function handleCorrespondenceTypeChange() {
+                if (this.value === 'permanence') {
+                    permanenceFields.classList.remove('hidden');
+                } else {
+                    permanenceFields.classList.add('hidden');
+                }
+            }
+
+            async function handleIncomingFormSubmit(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const data = {};
+                
+                for (let [key, value] of formData.entries()) {
+                    data[key] = value;
+                }
+                
+                const assigneeId = assigneeIdInput.value;
+                const assignee = appData.referenceData.employees.find(emp => emp.id === assigneeId);
+                
+                const employees = [];
+                document.querySelectorAll('.employee-entry').forEach(entry => {
+                    const employeeId = entry.querySelector('.employee-id').value;
+                    const employeeName = entry.querySelector('.concerned-person').value;
+                    const employeeNumber = entry.querySelector('.employee-number').value;
+
+                    if (employeeName || employeeNumber) { // فقط إذا كان هناك اسم أو رقم
+                        let employeeObject = null;
+                        
+                        if (employeeId) {
+                            // موظف موجود تم اختياره
+                            const foundEmployee = appData.referenceData.employees.find(e => e.id === employeeId);
+                            if(foundEmployee) {
+                                employeeObject = {
+                                    employeeId: foundEmployee.id,
+                                    status: entry.querySelector('.mail-status-select').value,
+                                    rejectionReason: entry.querySelector('.mail-status-select').value === 'rejected' ? 
+                                        entry.querySelector('.rejection-reason-select').value : '',
+                                    mail: entry.querySelector('.employee-mail').value
+                                };
+                            }
+                        } 
+                        
+                        if (!employeeObject) {
+                             // موظف تم إدخاله يدويًا - إضافته للبيانات المرجعية
+                            const newEmployee = {
+                                id: generateId(),
+                                number: employeeNumber,
+                                name: employeeName
+                            };
+                            appData.referenceData.employees.push(newEmployee);
+                            
+                            employeeObject = {
+                                employeeId: newEmployee.id,
+                                status: entry.querySelector('.mail-status-select').value,
+                                rejectionReason: entry.querySelector('.mail-status-select').value === 'rejected' ? 
+                                    entry.querySelector('.rejection-reason-select').value : '',
+                                mail: entry.querySelector('.employee-mail').value
+                            };
+                        }
+                        
+                        employees.push(employeeObject);
+                    }
+                });
+                
+                const incomingMail = {
+                    id: generateId(),
+                    sendingLocationId: data['sending-location'],
+                    sendingNumber: data['sending-number'],
+                    receiptDate: data['receipt-date'],
+                    correspondenceTypeId: data['correspondence-type'],
+                    agencyPresidencyId: data['agency-presidency'],
+                    draftDate: data['draft-date'],
+                    assigneeId: assignee ? assignee.id : null,
+                    mailCount: parseInt(data['mail-count']) || 1,
+                    employees: employees,
+                    outgoingMails: [],
+                    registration: {
+                        number: 'REG-' + new Date().getFullYear() + '-' + (appData.incomingMail.length + 1),
+                        count: employees.length,
+                        date: data['receipt-date'],
+                        subject: generateSubject(data['sending-location'], data['sending-number'])
+                    }
+                };
+                
+                appData.incomingMail.push(incomingMail);
+                
+                await saveDataToFile();
+                
+                console.log('بيانات البريد الوارد:', incomingMail);
+                showNotification('تم حفظ البريد الوارد بنجاح', 'success');
+                
+                setTimeout(() => {
+                    this.reset();
+                    permanenceFields.classList.add('hidden');
+                    employeesContainer.innerHTML = '';
+                    employeeCount = 0;
+                    addEmployeeEntry();
+                    assigneeIdInput.value = '';
+                }, 2000);
+            }
+
+            function handleReplyToIncoming() {
+                if (!selectedIncomingMail) return;
+                
+                // إظهار نموذج البريد الصادر
+                outgoingFormContainer.classList.remove('hidden');
+                
+                // تعبئة الحقول ببيانات البريد الوارد
+                const location = appData.referenceData.locations.find(loc => loc.id === selectedIncomingMail.sendingLocationId);
+                outgoingReference.value = selectedIncomingMail.sendingNumber;
+                subject.value = `رد على: ${generateSubject(selectedIncomingMail.sendingLocationId, selectedIncomingMail.sendingNumber)}`;
+                
+                // تعيين تاريخ اليوم كتاريخ افتراضي للبريد الصادر
+                outgoingDate.value = formatDateForInput(new Date());
+                
+                // عرض الموظفين المعنيين من البريد الوارد
+                displayEmployeesSelection(selectedIncomingMail.employees);
+                
+                // التمرير إلى نموذج البريد الصادر
+                outgoingFormContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            async function handleOutgoingFormSubmit(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const data = {};
+                
+                for (let [key, value] of formData.entries()) {
+                    data[key] = value;
+                }
+                
+                const employees = [];
+                document.querySelectorAll('#selected-employees-container .employee-entry').forEach(entry => {
+                    const employeeId = entry.getAttribute('data-employee-id');
+                    const employee = selectedEmployees.find(emp => emp.id === employeeId);
+                    
+                    if (employee) {
+                        const outgoingCount = entry.querySelector(`#outgoing-count-${employeeId}`).value;
+                        const incomingCount = entry.querySelector(`#incoming-count-${employeeId}`).value;
+                        
+                        employees.push({
+                            employeeId: employee.id,
+                            outgoingCount: outgoingCount,
+                            incomingCount: incomingCount
+                        });
+                    }
+                });
+                
+                const attachments = [];
+                document.querySelectorAll('.attachment-item input').forEach(input => {
+                    if (input.value) {
+                        attachments.push(input.value);
+                    }
+                });
+                
+                const outgoingMail = {
+                    id: generateId(),
+                    number: data['outgoing-number'],
+                    date: data['outgoing-date'],
+                    subject: data['subject'],
+                    attachments: attachments,
+                    employees: employees,
+                    incomingMailId: selectedIncomingMail ? selectedIncomingMail.id : null
+                };
+                
+                appData.outgoingMail.push(outgoingMail);
+                
+                if (selectedIncomingMail) {
+                    const incomingMail = appData.incomingMail.find(mail => mail.id === selectedIncomingMail.id);
+                    if (incomingMail) {
+                        incomingMail.outgoingMails.push(outgoingMail);
+                    }
+                }
+                
+                await saveDataToFile();
+                
+                console.log('بيانات البريد الصادر:', outgoingMail);
+                showNotification('تم حفظ البريد الصادر بنجاح', 'success');
+                
+                setTimeout(() => {
+                    this.reset();
+                    outgoingSearch.value = '';
+                    selectedIncomingMailDiv.classList.add('hidden');
+                    outgoingFormContainer.classList.add('hidden');
+                    selectedIncomingMail = null;
+                    selectedEmployees = [];
+                    attachmentCount = 0;
+                }, 2000);
+            }
+
+            async function handleSaveReply() {
+                if (!selectedOutgoingMail) {
+                    showNotification('لم يتم تحديد البريد الصادر', 'error');
+                    return;
+                }
+
+                // الحصول على الأشخاص المحددين
+                const selectedPersons = [];
+                document.querySelectorAll('#reply-persons-list input[type="checkbox"]:checked').forEach(checkbox => {
+                    const personId = checkbox.value;
+                    const person = selectedOutgoingMail.employees.find(emp => emp.employeeId === personId);
+                    if (person) {
+                        selectedPersons.push({
+                            employeeId: person.employeeId,
+                            status: 'distributed'
+                        });
+                    }
+                });
+
+                if (selectedPersons.length === 0) {
+                    showNotification('يرجى اختيار شخص واحد على الأقل', 'error');
+                    return;
+                }
+
+                // إنشاء بريد وارد جديد كرد على البريد الصادر
+                const currentDate = new Date();
+                const replyMail = {
+                    id: generateId(),
+                    sendingLocationId: 'reply-outgoing',
+                    sendingNumber: replyRegistrationNumber,
+                    receiptDate: formatDateForInput(currentDate),
+                    correspondenceTypeId: 'miscellaneous',
+                    agencyPresidencyId: 'agency',
+                    draftDate: formatDateForInput(currentDate),
+                    assigneeId: null,
+                    subject: `رد على البريد الصادر: ${selectedOutgoingMail.number}`,
+                    mailCount: 1,
+                    employees: selectedPersons,
+                    outgoingMails: [],
+                    registration: {
+                        number: replyRegistrationNumber,
+                        count: selectedPersons.length,
+                        date: formatDateForInput(currentDate),
+                        subject: `رد على البريد الصادر: ${selectedOutgoingMail.number}`
+                    },
+                    relatedOutgoingMailId: selectedOutgoingMail.id
+                };
+
+                appData.incomingMail.push(replyMail);
+
+                // حفظ البيانات
+                await saveDataToFile();
+
+                showNotification('تم حفظ الرد بنجاح', 'success');
+
+                // إعادة تعيين النموذج
+                setTimeout(() => {
+                    replyToOutgoingFormContainer.classList.add('hidden');
+                    selectedOutgoingMail = null;
+                }, 2000);
+            }
+
+            function handleCancelReply() {
+                replyToOutgoingFormContainer.classList.add('hidden');
+                selectedOutgoingMail = null;
+            }
+
+            // وظائف تحسين التخزين
+            async function handleOptimizeData() {
+                showNotification('جاري تحسين البيانات...', 'success');
+                
+                // إزالة البيانات المكررة
+                await cleanDuplicateData();
+                
+                // ضغط البيانات
+                await compressData();
+                
+                // تحديث وقت آخر تحسين
+                appData.systemInfo.lastOptimized = new Date().toISOString();
+                
+                await saveDataToFile();
+                
+                updateStorageStats();
+                showNotification('تم تحسين البيانات بنجاح', 'success');
+            }
+
+            async function handleCleanDuplicates() {
+                showNotification('جاري حذف البيانات المكررة...', 'success');
+                
+                await cleanDuplicateData();
+                
+                await saveDataToFile();
+                
+                updateStorageStats();
+                showNotification('تم حذف البيانات المكررة بنجاح', 'success');
+            }
+
+            function handleExportReport() {
+                // إنشاء تقرير إحصائي
+                const report = {
+                    generatedAt: new Date().toISOString(),
+                    systemInfo: appData.systemInfo,
+                    statistics: {
+                        totalEmployees: appData.referenceData.employees.length,
+                        totalLocations: appData.referenceData.locations.length,
+                        totalIncomingMail: appData.incomingMail.length,
+                        totalOutgoingMail: appData.outgoingMail.length,
+                        totalTasks: appData.tasks.length
+                    },
+                    storage: calculateStorageStats()
+                };
+                
+                // تحويل التقرير إلى JSON وتنزيله
+                const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `storage-report-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showNotification('تم تصدير التقرير بنجاح', 'success');
+            }
+
+            async function cleanDuplicateData() {
+                // تنظيف الموظفين المكررين
+                const uniqueEmployees = new Map();
+                appData.referenceData.employees.forEach(emp => {
+                    const key = `${emp.number}-${emp.name}`;
+                    if (!uniqueEmployees.has(key)) {
+                        uniqueEmployees.set(key, emp);
+                    }
+                });
+                appData.referenceData.employees = Array.from(uniqueEmployees.values());
+                
+                // تنظيف المواقع المكررة
+                const uniqueLocations = new Map();
+                appData.referenceData.locations.forEach(loc => {
+                    if (!uniqueLocations.has(loc.name)) {
+                        uniqueLocations.set(loc.name, loc);
+                    }
+                });
+                appData.referenceData.locations = Array.from(uniqueLocations.values());
+                
+                // تحديث المراجع في المراسلات
+                appData.incomingMail.forEach(mail => {
+                    const location = appData.referenceData.locations.find(loc => loc.name === getLocationName(mail.sendingLocationId));
+                    if (location) {
+                        mail.sendingLocationId = location.id;
+                    }
+                });
+            }
+
+            async function compressData() {
+                // هذه دالة وهمية لضغط البيانات
+                // في تطبيق حقيقي، يمكن استخدام خوارزميات ضغط حقيقية
+                
+                // إزالة الحقول الفارغة أو غير الضرورية
+                appData.incomingMail.forEach(mail => {
+                    if (!mail.rejectionReason) delete mail.rejectionReason;
+                    if (!mail.mail) delete mail.mail;
+                });
+                
+                appData.outgoingMail.forEach(mail => {
+                    if (!mail.attachments || mail.attachments.length === 0) {
+                        delete mail.attachments;
+                    }
+                });
+            }
+
+            function calculateStorageStats() {
+                // حساب إحصائيات التخزين
+                const dataSize = new Blob([JSON.stringify(appData)]).size;
+                const recordCount = appData.incomingMail.length + appData.outgoingMail.length + appData.tasks.length;
+                
+                // تقدير حجم البيانات غير المضغوطة
+                const estimatedUncompressedSize = dataSize * 1.6; // تقدير زيادة 60%
+                const compressionRate = ((estimatedUncompressedSize - dataSize) / estimatedUncompressedSize * 100).toFixed(1);
+                const spaceSaved = estimatedUncompressedSize - dataSize;
+                
+                return {
+                    currentSize: dataSize,
+                    estimatedUncompressedSize: estimatedUncompressedSize,
+                    compressionRate: parseFloat(compressionRate),
+                    spaceSaved: spaceSaved,
+                    recordCount: recordCount
+                };
+            }
+
+            function updateStorageStats() {
+                const stats = calculateStorageStats();
+                
+                dataSizeSpan.textContent = formatBytes(stats.currentSize);
+                recordCountSpan.textContent = stats.recordCount.toLocaleString();
+                compressionRateSpan.textContent = `${stats.compressionRate}%`;
+                spaceSavedSpan.textContent = formatBytes(stats.spaceSaved);
+            }
+
+            function formatBytes(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            function handleDocumentClick(e) {
+                // إخفاء قوائم الاقتراحات
+                if (!e.target.closest('.autocomplete-container')) {
+                    document.querySelectorAll('.autocomplete-items').forEach(item => item.classList.add('hidden'));
+                }
+            }
+
+            // دوال مساعدة
+            function formatDateForInput(date) {
+                return date.toISOString().split('T')[0];
+            }
+
+            function generateId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            }
+
+            function generateRegistrationNumber() {
+                const currentDate = new Date();
+                const year = currentDate.getFullYear();
+                const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+                const day = String(currentDate.getDate()).padStart(2, '0');
+                const sequence = String(appData.incomingMail.length + 1).padStart(4, '0');
+                return `REG-${year}${month}${day}-${sequence}`;
+            }
+
+            function generateSubject(locationId, number) {
+                const location = appData.referenceData.locations.find(loc => loc.id === locationId);
+                return location ? `${location.name} - ${number}` : number;
+            }
+
+            function getLocationName(locationId) {
+                const location = appData.referenceData.locations.find(loc => loc.id === locationId);
+                return location ? location.name : '';
+            }
+
+            async function saveDataToFile() {
+                try {
+                    const jsonData = JSON.stringify(appData, null, 2);
+
+                    if (dataFileHandle) {
+                        // استخدام File System Access API (الطريقة المثلى)
+                        const writable = await dataFileHandle.createWritable();
+                        await writable.write(jsonData);
+                        await writable.close();
+                        console.log('Data saved successfully to handle');
+                    } else if ('showSaveFilePicker' in window) {
+                         // إذا لم يكن لدينا "handle" ولكن الـ API مدعوم (نادر، لكن كاحتياط)
+                        const options = {
+                            types: [{ description: 'JSON Files', accept: { 'application/json': ['.json'] } }],
+                            suggestedName: 'mail-data.json',
+                        };
+                        const handle = await window.showSaveFilePicker(options);
+                        const writable = await handle.createWritable();
+                        await writable.write(jsonData);
+                        await writable.close();
+                        dataFileHandle = handle; // حفظ الـ handle للمستقبل
+                        console.log('Data saved successfully with new handle');
+                    } else {
+                        // الطريقة الاحتياطية (Fallback) - تنزيل الملف
+                        const blob = new Blob([jsonData], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'mail-data.json';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        console.log('Data saved successfully via download');
+                    }
+                } catch (error) {
+                    console.error('Error saving data to file:', error);
+                    if (error.name !== 'AbortError') {
+                        showNotification('حدث خطأ أثناء حفظ البيانات في الملف', 'error');
+                    }
+                }
+            }
+
+            function updateStatsBasedOnFilter(startDate, endDate) {
+                // فلترة البيانات الفعلية بناءً على التواريخ
+                const filteredIncoming = appData.incomingMail.filter(mail => {
+                    const mailDate = new Date(mail.receiptDate);
+                    return mailDate >= startDate && mailDate <= endDate;
+                });
+
+                const filteredOutgoing = appData.outgoingMail.filter(mail => {
+                    const mailDate = new Date(mail.date);
+                    return mailDate >= startDate && mailDate <= endDate;
+                });
+
+                const rejectedCount = filteredIncoming.reduce((count, mail) => {
+                    return count + mail.employees.filter(emp => emp.status === 'rejected').length;
+                }, 0);
+
+                const distributedCount = filteredIncoming.reduce((count, mail) => {
+                    return count + mail.employees.filter(emp => emp.status === 'distributed').length;
+                }, 0);
+
+                document.getElementById('incoming-count').textContent = filteredIncoming.length;
+                document.getElementById('outgoing-count').textContent = filteredOutgoing.length;
+                document.getElementById('rejected-count').textContent = rejectedCount;
+                document.getElementById('distributed-count').textContent = distributedCount;
+            }
+
+            function displaySearchResults(results) {
+                searchResults.innerHTML = '';
+                
+                if (results.length === 0) {
+                    searchResults.innerHTML = '<p>لا توجد نتائج للبحث</p>';
+                    return;
+                }
+                
+                results.forEach(result => {
+                    const mailCard = document.createElement('div');
+                    mailCard.classList.add('linked-mail-item');
+                    
+                    if (result.type === 'incoming') {
+                        const location = appData.referenceData.locations.find(loc => loc.id === result.sendingLocationId);
+                        const correspondenceType = appData.referenceData.correspondenceTypes.find(ct => ct.id === result.correspondenceTypeId);
+                        const agency = appData.referenceData.agencies.find(a => a.id === result.agencyPresidencyId);
+                        const assignee = result.assigneeId ? appData.referenceData.employees.find(emp => emp.id === result.assigneeId) : null;
+                        
+                        mailCard.innerHTML = `
+                            <div class="linked-mail-header">
+                                <span class="linked-mail-number">${result.sendingNumber}</span>
+                                <span class="linked-mail-date">${result.receiptDate}</span>
+                            </div>
+                            <div class="linked-mail-subject">${generateSubject(result.sendingLocationId, result.sendingNumber)}</div>
+                            <div class="linked-mail-details">
+                                <div class="linked-mail-detail">
+                                    <div class="linked-mail-detail-label">مقر الإرسال</div>
+                                    <div>${location ? location.name : 'غير محدد'}</div>
+                                </div>
+                                <div class="linked-mail-detail">
+                                    <div class="linked-mail-detail-label">نوع المراسلة</div>
+                                    <div>${correspondenceType ? correspondenceType.name : 'غير محدد'}</div>
+                                </div>
+                                <div class="linked-mail-detail">
+                                    <div class="linked-mail-detail-label">النيابة/الرئاسة</div>
+                                    <div>${agency ? agency.name : 'غير محدد'}</div>
+                                </div>
+                                <div class="linked-mail-detail">
+                                    <div class="linked-mail-detail-label">المكلف</div>
+                                    <div>${assignee ? assignee.name : 'غير محدد'}</div>
+                                </div>
+                                <div class="linked-mail-detail">
+                                    <div class="linked-mail-detail-label">عدد المراسلات</div>
+                                    <div>${result.mailCount || 1}</div>
+                                </div>
+                            </div>
+                            <div class="concerned-persons">
+                                <h4>الموظفون المعنيون:</h4>
+                                ${result.employees.map(emp => {
+                                    const employee = appData.referenceData.employees.find(e => e.id === emp.employeeId);
+                                    return `
+                                        <div class="concerned-person-item">
+                                            ${employee ? employee.name : 'غير معروف'} (${employee ? employee.number : 'غير معروف'}) - ${emp.status === 'distributed' ? 'موزع' : 'مرفوض'}
+                                            ${emp.rejectionReason ? `- سبب الرفض: ${emp.rejectionReason}` : ''}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                            <div class="mail-link-actions">
+                                <button type="button" class="btn btn-primary" onclick="showReplyForm('${result.id}')">
+                                    <i class="fas fa-reply"></i> رد
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        // البحث عن البريد الوارد المرتبط
+                        const incomingMail = appData.incomingMail.find(mail => mail.id === result.incomingMailId);
+                        const incomingLocation = incomingMail ? appData.referenceData.locations.find(loc => loc.id === incomingMail.sendingLocationId) : null;
+                        
+                        mailCard.innerHTML = `
+                            <div class="linked-mail-header">
+                                <span class="linked-mail-number">${result.number}</span>
+                                <span class="linked-mail-date">${result.date}</span>
+                            </div>
+                            <div class="linked-mail-subject">${result.subject}</div>
+                            <div class="linked-mail-details">
+                                <div class="linked-mail-detail">
+                                    <div class="linked-mail-detail-label">البريد الوارد المرتبط</div>
+                                    <div>${incomingMail ? incomingMail.sendingNumber : 'غير معروف'}</div>
+                                </div>
+                                <div class="linked-mail-detail">
+                                    <div class="linked-mail-detail-label">مقر الإرسال</div>
+                                    <div>${incomingLocation ? incomingLocation.name : 'غير معروف'}</div>
+                                </div>
+                                <div class="linked-mail-detail">
+                                    <div class="linked-mail-detail-label">عدد المرفقات</div>
+                                    <div>${result.attachments ? result.attachments.length : 0}</div>
+                                </div>
+                            </div>
+                            <div class="concerned-persons">
+                                <h4>الموظفون المعنيون:</h4>
+                                ${result.employees.map(emp => {
+                                    const employee = appData.referenceData.employees.find(e => e.id === emp.employeeId);
+                                    return `
+                                        <div class="concerned-person-item">
+                                            ${employee ? employee.name : 'غير معروف'} (${employee ? employee.number : 'غير معروف'}) - صادر: ${emp.outgoingCount}, وارد: ${emp.incomingCount}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                            <div class="mail-link-actions">
+                                <button type="button" class="btn btn-primary" onclick="showReplyToOutgoingForm('${result.id}')">
+                                    <i class="fas fa-reply"></i> جواب
+                                </button>
+                            </div>
+                        `;
+                    }
+                    
+                    searchResults.appendChild(mailCard);
+                });
+            }
+
+            // دالة لعرض قائمة المهام
+            function renderTaskList() {
+                taskList.innerHTML = ''; // مسح القائمة الحالية (بما في ذلك الأمثلة)
+                
+                if (appData.tasks.length === 0) {
+                    taskList.innerHTML = '<p>لا توجد مهام حاليًا.</p>';
+                    return;
+                }
+                
+                appData.tasks.forEach(task => addTaskToList(task));
+            }
+
+            // دالة لإضافة عنصر مهمة إلى الواجهة
+            function addTaskToList(task) {
+                const taskItem = document.createElement('div');
+                taskItem.classList.add('task-item');
+                
+                let statusClass = '';
+                let statusText = '';
+                
+                switch(task.status) {
+                    case 'pending':
+                        statusClass = 'status-pending';
+                        statusText = 'قيد الانتظار';
+                        break;
+                    case 'in-progress':
+                        statusClass = 'status-in-progress';
+                        statusText = 'قيد التنفيذ';
+                        break;
+                    case 'completed':
+                        statusClass = 'status-completed';
+                        statusText = 'مكتملة';
+                        break;
+                }
+                
+                taskItem.innerHTML = `
+                    <div class="task-status ${statusClass}">${statusText}</div>
+                    <h3>${task.title}</h3>
+                    <p><strong>الموظف:</strong> ${task.assignee ? task.assignee.name : 'غير محدد'}</p>
+                    <p><strong>تاريخ الانتهاء:</strong> ${task.deadline}</p>
+                    <p><strong>الوصف:</strong> ${task.description || 'لا يوجد وصف'}</p>
+                `;
+                
+                taskList.appendChild(taskItem);
+            }
+
+            function handleAutocomplete(inputElement, autocompleteContainer, dataSource, isIncomingSearch = false) {
+                const value = inputElement.value.toLowerCase();
+                autocompleteContainer.innerHTML = '';
+                
+                if (value.length < 2) {
+                    autocompleteContainer.classList.add('hidden');
+                    return;
+                }
+                
+                const filteredData = dataSource.filter(item => {
+                    const number = item.sendingNumber || item.number;
+                    const subject = item.subject || '';
+                    return number.toLowerCase().includes(value) || subject.toLowerCase().includes(value);
+                });
+                
+                if (filteredData.length === 0) {
+                    autocompleteContainer.classList.add('hidden');
+                    return;
+                }
+                
+                autocompleteContainer.classList.remove('hidden');
+                filteredData.forEach(item => {
+                    const div = document.createElement('div');
+                    div.classList.add('autocomplete-item');
+                    div.setAttribute('role', 'option');
+                    div.textContent = `${item.sendingNumber || item.number} - ${item.subject || generateSubject(item.sendingLocationId, item.sendingNumber)}`;
+                    div.addEventListener('click', function() {
+                        inputElement.value = item.sendingNumber || item.number;
+                        autocompleteContainer.classList.add('hidden');
+                        
+                        if (isIncomingSearch) {
+                            selectedIncomingMail = item;
+                            displayIncomingMailDetails(item);
+                        }
+                    });
+                    autocompleteContainer.appendChild(div);
+                });
+            }
+
+            function handleEmployeeAutocomplete(inputElement, autocompleteContainer, hiddenIdInput) {
+                const value = inputElement.value.toLowerCase();
+                autocompleteContainer.innerHTML = '';
+                
+                if (value.length < 2) {
+                    autocompleteContainer.classList.add('hidden');
+                    return;
+                }
+                
+                const filteredEmployees = appData.referenceData.employees.filter(emp => 
+                    emp.number.toLowerCase().includes(value) || 
+                    emp.name.toLowerCase().includes(value)
+                );
+                
+                if (filteredEmployees.length === 0) {
+                    autocompleteContainer.innerHTML = '<div class="autocomplete-item">لا توجد نتائج</div>';
+                    autocompleteContainer.classList.remove('hidden');
+                    return;
+                }
+                
+                autocompleteContainer.classList.remove('hidden');
+                filteredEmployees.forEach(employee => {
+                    const div = document.createElement('div');
+                    div.classList.add('autocomplete-item');
+                    div.setAttribute('role', 'option');
+                    div.textContent = `${employee.number} - ${employee.name}`;
+                    div.addEventListener('click', function() {
+                        inputElement.value = employee.name;
+                        hiddenIdInput.value = employee.id;
+                        autocompleteContainer.classList.add('hidden');
+                    });
+                    autocompleteContainer.appendChild(div);
+                });
+            }
+
+            function displayIncomingMailDetails(mail) {
+                selectedIncomingMailDiv.classList.remove('hidden');
+                
+                // البحث عن البريد الصادر المرتبط إذا وجد
+                const relatedOutgoingMails = appData.outgoingMail.filter(om => om.incomingMailId === mail.id);
+                
+                const location = appData.referenceData.locations.find(loc => loc.id === mail.sendingLocationId);
+                const correspondenceType = appData.referenceData.correspondenceTypes.find(ct => ct.id === mail.correspondenceTypeId);
+                const agency = appData.referenceData.agencies.find(a => a.id === mail.agencyPresidencyId);
+                const assignee = mail.assigneeId ? appData.referenceData.employees.find(emp => emp.id === mail.assigneeId) : null;
+                
+                incomingMailDetails.innerHTML = `
+                    <div class="mail-details">
+                        <h4>معلومات البريد الوارد</h4>
+                        <p><strong>رقم الإرسال:</strong> ${mail.sendingNumber}</p>
+                        <p><strong>مقر الإرسال:</strong> ${location ? location.name : 'غير محدد'}</p>
+                        <p><strong>تاريخ التوصل:</strong> ${mail.receiptDate}</p>
+                        <p><strong>نوع المراسلة:</strong> ${correspondenceType ? correspondenceType.name : 'غير محدد'}</p>
+                        <p><strong>النيابة/الرئاسة:</strong> ${agency ? agency.name : 'غير محدد'}</p>
+                        <p><strong>تاريخ التحرير:</strong> ${mail.draftDate}</p>
+                        <p><strong>المكلف:</strong> ${assignee ? assignee.name : 'غير محدد'}</p>
+                        <p><strong>عدد المراسلات:</strong> ${mail.mailCount || 1}</p>
+                        
+                        ${relatedOutgoingMails.length > 0 ? `
+                            <h4>البريد الصادر المرتبط:</h4>
+                            ${relatedOutgoingMails.map(om => `
+                                <p><strong>رقم البريد الصادر:</strong> ${om.number}</p>
+                                <p><strong>تاريخ الإرسال:</strong> ${om.date}</p>
+                                <p><strong>الموضوع:</strong> ${om.subject}</p>
+                            `).join('')}
+                        ` : ''}
+                        
+                        <div class="concerned-persons">
+                            <h4>الموظفون المعنيون (${mail.employees.length}):</h4>
+                            ${mail.employees.map(emp => {
+                                const employee = appData.referenceData.employees.find(e => e.id === emp.employeeId);
+                                return `
+                                    <div class="concerned-person-item">
+                                        ${employee ? employee.name : 'غير معروف'} (${employee ? employee.number : 'غير معروف'}) - ${emp.mail || 'لا يوجد'} - ${emp.status === 'distributed' ? 'موزع' : 'مرفوض'}
+                                        ${emp.rejectionReason ? `- سبب الرفض: ${emp.rejectionReason}` : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            function displayOutgoingMailDetails(mail) {
+                // البحث عن البريد الوارد المرتبط
+                const incomingMail = appData.incomingMail.find(im => im.id === mail.incomingMailId);
+                const incomingLocation = incomingMail ? appData.referenceData.locations.find(loc => loc.id === incomingMail.sendingLocationId) : null;
+                
+                outgoingMailDetails.innerHTML = `
+                    <div class="mail-details">
+                        <h4>معلومات البريد الصادر</h4>
+                        <p><strong>رقم البريد الصادر:</strong> ${mail.number}</p>
+                        <p><strong>تاريخ الإرسال:</strong> ${mail.date}</p>
+                        <p><strong>الموضوع:</strong> ${mail.subject}</p>
+                        <p><strong>البريد الوارد المرتبط:</strong> ${incomingMail ? incomingMail.sendingNumber : 'غير معروف'}</p>
+                        <p><strong>مقر الإرسال:</strong> ${incomingLocation ? incomingLocation.name : 'غير معروف'}</p>
+                        
+                        <div class="concerned-persons">
+                            <h4>الموظفون المعنيون (${mail.employees.length}):</h4>
+                            ${mail.employees.map(emp => {
+                                const employee = appData.referenceData.employees.find(e => e.id === emp.employeeId);
+                                return `
+                                    <div class="concerned-person-item">
+                                        ${employee ? employee.name : 'غير معروف'} (${employee ? employee.number : 'غير معروف'}) - صادر: ${emp.outgoingCount}, وارد: ${emp.incomingCount}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            function getCorrespondenceTypeText(type) {
+                const correspondenceType = appData.referenceData.correspondenceTypes.find(ct => ct.id === type);
+                return correspondenceType ? correspondenceType.name : type;
+            }
+
+            function addEmployeeEntry() {
+                employeeCount++;
+                
+                const employeeEntry = document.createElement('div');
+                employeeEntry.classList.add('employee-entry');
+                employeeEntry.setAttribute('data-employee-id', employeeCount);
+                
+                employeeEntry.innerHTML = `
+                    <h3><i class="fas fa-user"></i> الموظف ${employeeCount}</h3>
+                    ${employeeCount > 1 ? '<button type="button" class="remove-employee"><i class="fas fa-times"></i></button>' : ''}
+                    
+                    <input type="hidden" class="employee-id" id="employee-id-${employeeCount}">
+
+                    <div class="form-row">
+                        <div class="form-group autocomplete-container">
+                            <label for="employee-number-${employeeCount}">رقم الموظف (ابحث هنا)</label>
+                            <input type="text" id="employee-number-${employeeCount}" name="employee-number-${employeeCount}" class="employee-number">
+                            <div id="employee-number-autocomplete-${employeeCount}" class="autocomplete-items hidden" role="listbox"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="concerned-person-${employeeCount}" class="required">اسم المعني</label>
+                            <input type="text" id="concerned-person-${employeeCount}" name="concerned-person-${employeeCount}" class="concerned-person" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="employee-mail-${employeeCount}">البريد الذي يخصه</label>
+                            <input type="text" id="employee-mail-${employeeCount}" name="employee-mail-${employeeCount}" class="employee-mail">
+                        </div>
+                    </div>
+                    
+                    <div class="mail-status">
+                        <div class="form-group">
+                            <label for="mail-status-${employeeCount}">الحالة</label>
+                            <select id="mail-status-${employeeCount}" name="mail-status-${employeeCount}" class="mail-status-select">
+                                <option value="distributed">موزع</option>
+                                <option value="rejected">مرفوض</option>
+                            </select>
+                        </div>
+                        <div class="form-group rejection-reason hidden" id="rejection-reason-${employeeCount}">
+                            <label for="rejection-reason-select-${employeeCount}">سبب الرفض</label>
+                            <select id="rejection-reason-select-${employeeCount}" name="rejection-reason-select-${employeeCount}">
+                                <option value="">-- اختر سبب الرفض --</option>
+                                <option value="incomplete">معلومات ناقصة</option>
+                                <option value="incorrect">معلومات غير صحيحة</option>
+                                <option value="duplicate">مكرر</option>
+                                <option value="not-eligible">غير مؤهل</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+                
+                employeesContainer.appendChild(employeeEntry);
+                
+                const employeeNumberInput = employeeEntry.querySelector(`#employee-number-${employeeCount}`);
+                const employeeNumberAutocomplete = employeeEntry.querySelector(`#employee-number-autocomplete-${employeeCount}`);
+                const concernedPersonInput = employeeEntry.querySelector(`#concerned-person-${employeeCount}`);
+                const employeeIdInput = employeeEntry.querySelector(`#employee-id-${employeeCount}`);
+
+                employeeNumberInput.addEventListener('input', debounce(function() {
+                    const employeeNumber = this.value.trim().toLowerCase();
+                    
+                    if (employeeNumber.length >= 2) {
+                        const filteredEmployees = appData.referenceData.employees.filter(emp => 
+                            emp.number.toLowerCase().includes(employeeNumber) ||
+                            emp.name.toLowerCase().includes(employeeNumber)
+                        );
+                        displayEmployeeNumberAutocomplete(filteredEmployees, employeeNumberAutocomplete, employeeNumberInput, concernedPersonInput, employeeIdInput);
+                    } else {
+                        employeeNumberAutocomplete.classList.add('hidden');
+                    }
+                }, 300));
+                
+                const statusSelect = employeeEntry.querySelector(`#mail-status-${employeeCount}`);
+                const rejectionReason = employeeEntry.querySelector(`#rejection-reason-${employeeCount}`);
+                
+                statusSelect.addEventListener('change', function() {
+                    if (this.value === 'rejected') {
+                        rejectionReason.classList.remove('hidden');
+                    } else {
+                        rejectionReason.classList.add('hidden');
+                    }
+                });
+                
+                if (employeeCount > 1) {
+                    const removeBtn = employeeEntry.querySelector('.remove-employee');
+                    removeBtn.addEventListener('click', function() {
+                        employeeEntry.remove();
+                    });
+                }
+            }
+
+            function displayEmployeeNumberAutocomplete(employees, autocompleteContainer, numberInput, nameInput, idInput) {
+                autocompleteContainer.innerHTML = '';
+                
+                if (employees.length === 0) {
+                    autocompleteContainer.innerHTML = '<div class="autocomplete-item">لا توجد نتائج</div>';
+                    autocompleteContainer.classList.remove('hidden');
+                    return;
+                }
+                
+                autocompleteContainer.classList.remove('hidden');
+                employees.forEach(employee => {
+                    const div = document.createElement('div');
+                    div.classList.add('autocomplete-item');
+                    div.setAttribute('role', 'option');
+                    div.textContent = `${employee.number} - ${employee.name}`;
+                    div.addEventListener('click', function() {
+                        nameInput.value = employee.name;
+                        numberInput.value = employee.number;
+                        idInput.value = employee.id;
+                        autocompleteContainer.classList.add('hidden');
+                    });
+                    autocompleteContainer.appendChild(div);
+                });
+            }
+
+            function displayEmployeesSelection(employees) {
+                employeesSelectionContainer.classList.remove('hidden');
+                employeesSelectionList.innerHTML = '';
+                selectedEmployees = []; // إعادة تعيين الموظفين المختارين
+                
+                employees.forEach(employee => {
+                    const div = document.createElement('div');
+                    div.classList.add('checkbox-group'); // استخدام كلاس موجود
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `employee-${employee.employeeId}`;
+                    checkbox.value = employee.employeeId;
+                    checkbox.checked = true; // تحديد جميع الموظفين افتراضيًا
+                    
+                    const employeeData = appData.referenceData.employees.find(emp => emp.id === employee.employeeId);
+                    
+                    const label = document.createElement('label');
+                    label.htmlFor = `employee-${employee.employeeId}`;
+                    label.textContent = `${employeeData ? employeeData.name : 'غير معروف'} (${employeeData ? employeeData.number : 'غير معروف'})`;
+                    
+                    div.appendChild(checkbox);
+                    div.appendChild(label);
+                    employeesSelectionList.appendChild(div);
+                    
+                    checkbox.addEventListener('change', function() {
+                        if (this.checked) {
+                            selectedEmployees.push(employee);
+                            addSelectedEmployee(employee);
+                        } else {
+                            selectedEmployees = selectedEmployees.filter(emp => emp.employeeId !== employee.employeeId);
+                            removeSelectedEmployee(employee.employeeId);
+                        }
+                    });
+                    
+                    // إضافة الموظف المحدد افتراضيًا
+                    if (checkbox.checked) {
+                        selectedEmployees.push(employee);
+                        addSelectedEmployee(employee);
+                    }
+                });
+            }
+
+            function addSelectedEmployee(employee) {
+                const employeeEntry = document.createElement('div');
+                employeeEntry.classList.add('employee-entry');
+                employeeEntry.setAttribute('data-employee-id', employee.employeeId);
+                
+                const employeeData = appData.referenceData.employees.find(emp => emp.id === employee.employeeId);
+                
+                employeeEntry.innerHTML = `
+                    <h3><i class="fas fa-user"></i> ${employeeData ? employeeData.name : 'غير معروف'}</h3>
+                    <button type="button" class="remove-employee"><i class="fas fa-times"></i></button>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="outgoing-count-${employee.employeeId}">عدد البريد الصادر</label>
+                            <input type="number" id="outgoing-count-${employee.employeeId}" name="outgoing-count-${employee.employeeId}" min="1" value="${employee.outgoingCount || 1}">
+                        </div>
+                        <div class="form-group">
+                            <label for="incoming-count-${employee.employeeId}">عدد البريد الوارد</label>
+                            <input type="number" id="incoming-count-${employee.employeeId}" name="incoming-count-${employee.employeeId}" min="1" value="${employee.incomingCount || 1}">
+                        </div>
+                    </div>
+                `;
+                
+                selectedEmployeesContainer.appendChild(employeeEntry);
+                
+                const removeBtn = employeeEntry.querySelector('.remove-employee');
+                removeBtn.addEventListener('click', function() {
+                    const checkbox = document.getElementById(`employee-${employee.employeeId}`);
+                    if (checkbox) {
+                        checkbox.checked = false;
+                    }
+                    selectedEmployees = selectedEmployees.filter(emp => emp.employeeId !== employee.employeeId);
+                    employeeEntry.remove();
+                });
+            }
+
+            function removeSelectedEmployee(employeeId) {
+                const employeeEntry = document.querySelector(`#selected-employees-container .employee-entry[data-employee-id="${employeeId}"]`);
+                if (employeeEntry) {
+                    employeeEntry.remove();
+                }
+            }
+
+            function addAttachment() {
+                attachmentCount++;
+                
+                const attachmentItem = document.createElement('div');
+                attachmentItem.classList.add('attachment-item');
+                
+                attachmentItem.innerHTML = `
+                    <label for="attachment-${attachmentCount}">رابط PDF:</label>
+                    <input type="url" id="attachment-${attachmentCount}" name="attachment-${attachmentCount}" placeholder="https://example.com/document.pdf" required>
+                    <button type="button" class="remove-attachment"><i class="fas fa-trash"></i></button>
+                `;
+                
+                attachmentsContainer.appendChild(attachmentItem);
+                
+                const removeBtn = attachmentItem.querySelector('.remove-attachment');
+                removeBtn.addEventListener('click', function() {
+                    attachmentItem.remove();
+                });
+            }
+
+            function showNotification(message, type) {
+                const notification = document.getElementById('notification');
+                const notificationMessage = document.getElementById('notification-message');
+                
+                notification.className = 'notification';
+                if (type === 'success') {
+                    notification.classList.add('notification-success');
+                    notification.querySelector('i').className = 'fas fa-check-circle';
+                } else if (type === 'error') {
+                    notification.classList.add('notification-error');
+                    notification.querySelector('i').className = 'fas fa-exclamation-circle';
+                }
+                
+                notificationMessage.textContent = message;
+                notification.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    notification.classList.add('hidden');
+                }, 3000);
+            }
+
+            function debounce(func, wait) {
+                return function() {
+                    const context = this;
+                    const args = arguments;
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => {
+                        func.apply(context, args);
+                    }, wait);
+                };
+            }
+
+            // دوال للرد على البريد
+            window.showReplyForm = function(mailId) {
+                const mail = appData.incomingMail.find(m => m.id === mailId);
+                if (!mail) return;
+                
+                // الانتقال إلى قسم إضافة البريد
+                document.querySelector('[data-section="add-mail"]').click();
+                
+                // الانتقال إلى تبويب البريد الصادر
+                document.querySelector('[data-tab="outgoing"]').click();
+                
+                // تعبئة حقل البحث
+                setTimeout(() => {
+                    outgoingSearch.value = mail.sendingNumber;
+                    selectedIncomingMail = mail;
+                    displayIncomingMailDetails(mail);
+                    handleReplyToIncoming();
+                }, 100);
+            };
+
+            window.showReplyToOutgoingForm = function(mailId) {
+                const mail = appData.outgoingMail.find(m => m.id === mailId);
+                if (!mail) return;
+                
+                // الانتقال إلى قسم إضافة البريد
+                document.querySelector('[data-section="add-mail"]').click();
+                
+                // الانتقال إلى تبويب البريد الصادر
+                document.querySelector('[data-tab="outgoing"]').click();
+                
+                // تعيين البريد الصادر المحدد
+                setTimeout(() => {
+                    selectedOutgoingMail = mail;
+                    
+                    // إنشاء رقم تسجيل جديد
+                    replyRegistrationNumber = generateRegistrationNumber();
+                    
+                    // تعيين تاريخ اليوم
+                    const today = new Date();
+                    replyDateSpan.textContent = formatDateForInput(today);
+                    
+                    // عرض رقم التسجيل
+                    replyRegistrationNumberSpan.textContent = replyRegistrationNumber;
+                    
+                    // عرض تفاصيل البريد الصادر
+                    displayOutgoingMailDetails(mail);
+                    
+                    // عرض قائمة الأشخاص مع خانات الاختيار
+                    displayReplyPersonsList(mail.employees);
+                    
+                    // إظهار نموذج الرد
+                    replyToOutgoingFormContainer.classList.remove('hidden');
+                    
+                    // إخفاء النماذج الأخرى
+                    selectedIncomingMailDiv.classList.add('hidden');
+                    outgoingFormContainer.classList.add('hidden');
+                    
+                    // التمرير إلى النموذج
+                    replyToOutgoingFormContainer.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+            };
+
+            function displayReplyPersonsList(employees) {
+                replyPersonsList.innerHTML = '';
+                
+                employees.forEach(employee => {
+                    const employeeData = appData.referenceData.employees.find(emp => emp.id === employee.employeeId);
+                    const personItem = document.createElement('div');
+                    personItem.classList.add('person-item');
+                    
+                    personItem.innerHTML = `
+                        <input type="checkbox" id="reply-person-${employee.employeeId}" value="${employee.employeeId}">
+                        <label for="reply-person-${employee.employeeId}">
+                            <div class="person-details">
+                                <span class="person-name">${employeeData ? employeeData.name : 'غير معروف'}</span>
+                                <span class="person-number">${employeeData ? employeeData.number : 'غير معروف'}</span>
+                            </div>
+                        </label>
+                    `;
+                    
+                    replyPersonsList.appendChild(personItem);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
